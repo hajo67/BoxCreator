@@ -7,7 +7,7 @@ using netDxf;
 
 namespace BoxCreator.Geometry;
 
-public class Document
+public sealed class Document
 {
     public void Clear()
     {

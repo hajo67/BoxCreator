@@ -8,7 +8,7 @@ using netDxf.Entities;
 
 namespace BoxCreator.Geometry;
 
-public class Polyline
+public sealed class Polyline
 {
     public Polyline2D DxfPolyline => _polyline;
 
