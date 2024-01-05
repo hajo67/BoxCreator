@@ -4,14 +4,21 @@
 // Ignore Spelling: Dxf Polyline
 
 using netDxf;
+using netDxf.Units;
 
 namespace BoxCreator.Geometry;
 
 public sealed class Document
 {
+    public Document()
+    {
+        _dxfDocument.DrawingVariables.InsUnits = DrawingUnits.Millimeters;
+    }
+
     public void Clear()
     {
         _dxfDocument = new();
+        _dxfDocument.DrawingVariables.InsUnits = DrawingUnits.Millimeters;
     }
 
     public void AddPolyline(Polyline polyline)
