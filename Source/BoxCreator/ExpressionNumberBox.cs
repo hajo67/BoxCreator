@@ -2,10 +2,13 @@
 // Licensed under MIT license
 
 
+using System.Globalization;
+
 namespace BoxCreator.BoxCreator;
 
-internal sealed class ExpressionTextBox : TextBox
+internal sealed class ExpressionNumberBox : TextBox
 {
+    public bool HighlightEvaluationErrors { get; set; }
     public Units ActiveUnit
     {
         get => _activeUnit;
@@ -26,6 +29,14 @@ internal sealed class ExpressionTextBox : TextBox
         {
             EvaluateText();
             return _evaluatedText;
+        }
+    }
+    public string EvaluationErrorMessage
+    {
+        get
+        {
+            EvaluateText();
+            return _evaluationError is null ? string.Empty : _evaluationError;
         }
     }
 
@@ -53,6 +64,22 @@ internal sealed class ExpressionTextBox : TextBox
             (_evaluatedText, _evaluationError) = _expressionSolver.SolveExpression(this.Text);
             _evaluationSucceded = _evaluationError is null;
             _toolTip.SetToolTip(this, _evaluationSucceded ? _evaluatedText : _evaluationError);
+
+            if (HighlightEvaluationErrors)
+            {
+                var isNumber = float.TryParse(_evaluatedText,
+                    NumberStyles.Float,
+                    CultureInfo.InvariantCulture,
+                    out var _);
+                if (_evaluationSucceded && isNumber)
+                {
+                    BackColor = Color.White;
+                }
+                else
+                {
+                    BackColor = Color.Orange;
+                }
+            }
         }
     }
 

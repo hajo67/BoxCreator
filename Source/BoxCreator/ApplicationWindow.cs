@@ -1,6 +1,8 @@
 ﻿// Created by Hans-Jörg Schmid
 // Licensed under MIT license
 
+using System.Globalization;
+
 namespace BoxCreator.BoxCreator;
 
 internal sealed class ApplicationWindow : Form
@@ -12,7 +14,7 @@ internal sealed class ApplicationWindow : Form
 
     private void InitializeComponent()
     {
-        this.Size = new Size(580, 480);
+        this.Size = new Size(580, 520);
         this.Text = "Box Creator";
         this.Padding = new Padding(10);
 
@@ -73,7 +75,7 @@ internal sealed class ApplicationWindow : Form
         if (changedUnit != _activeUnit)
         {
             _activeUnit = changedUnit;
-            ExpressionTextBox[] allTextBoxes =
+            ExpressionNumberBox[] allTextBoxes =
                 [
                     _boxLength,
                     _boxWidth,
@@ -102,7 +104,7 @@ internal sealed class ApplicationWindow : Form
         var groupBox = new GroupBox()
         {
             Text = "Finger Joint Settings",
-            MinimumSize = new Size(340, 110),
+            MinimumSize = new Size(340, 140),
             Padding = new Padding(10)
         };
         var tableLayout = new TableLayoutPanel()
@@ -110,10 +112,17 @@ internal sealed class ApplicationWindow : Form
             Dock = DockStyle.Fill
         };
 
+        _cornerRelief.Items.Add("None");
+        _cornerRelief.Items.Add("Standard Dog Bone");
+        _cornerRelief.Items.Add("Minimal Dog Bone");
+        _cornerRelief.Items.Add("Hidden");
+        _cornerRelief.SelectedIndex = 0;
         tableLayout.Controls.Add(CreateLabel("Min. Finger Length"), 0, 0);
         tableLayout.Controls.Add(_fingerLength, 1, 0);
         tableLayout.Controls.Add(CreateLabel("End Mill Diameter"), 0, 1);
         tableLayout.Controls.Add(_endmillDiameter, 1, 1);
+        tableLayout.Controls.Add(CreateLabel("Corner Relief"), 0, 2);
+        tableLayout.Controls.Add(_cornerRelief, 1, 2);
 
         groupBox.Controls.Add(tableLayout);
         _mainLayout.Controls.Add(groupBox, 0, 1);
@@ -121,7 +130,14 @@ internal sealed class ApplicationWindow : Form
 
     private void CreateBoxClicked(object? sender, EventArgs e)
     {
-        MessageBox.Show("Create Box");
+        var lengthOk = GetFloatValueFromTextBox(_boxLength, out var boxLength);
+        var widthOk = GetFloatValueFromTextBox(_boxWidth, out var boxWidth);
+        var heightOk = GetFloatValueFromTextBox(_boxHeight, out var boxHeight);
+        var thicknessOk = GetFloatValueFromTextBox(_materialThickness, out var thickness);
+
+        if (lengthOk && widthOk && heightOk && thicknessOk)
+        {
+        }
     }
 
     private static Label CreateLabel(string text)
@@ -133,15 +149,55 @@ internal sealed class ApplicationWindow : Form
         };
     }
 
+    private bool GetFloatValueFromTextBox(ExpressionNumberBox textBox, out float floatValue)
+    {
+        if (!textBox.EvaluationSucceeded)
+        {
+            textBox.Focus();
+            ShowErrorMessage(
+                $"Failed to evaluate expression:\n'{textBox.Text}' ->\n{textBox.EvaluationErrorMessage}",
+                "Error evaluating value");
+            floatValue = float.NaN;
+            return false;
+        }
+
+        var success = float.TryParse(textBox.EvaluatedText,
+            NumberStyles.Float,
+            CultureInfo.InvariantCulture,
+            out floatValue);
+
+        if (!success)
+        {
+            textBox.Focus();
+            ShowErrorMessage(
+                $"Failed to convert text to number:\n'{textBox.Text}' ->\n'{textBox.EvaluatedText}'",
+                "Error converting text to number");
+            floatValue = float.NaN;
+            return false;
+        }
+
+        return success;
+    }
+
+    private void ShowErrorMessage(string message, string title)
+    {
+        MessageBox.Show(Control.FromHandle(this.Handle),
+            message,
+            title,
+            MessageBoxButtons.OK,
+            MessageBoxIcon.Stop);
+    }
+
     private const int INPUT_CONTROL_WIDTH = 140;
     private Units _activeUnit = Units.Millimeter;
     private readonly TableLayoutPanel _mainLayout = new() { Dock = DockStyle.Fill };
     private readonly ComboBox _units = new() { Width = INPUT_CONTROL_WIDTH };
     private readonly ComboBox _boxType = new() { Width = INPUT_CONTROL_WIDTH };
-    private readonly ExpressionTextBox _boxLength = new() { Text = "400 mm", Width = INPUT_CONTROL_WIDTH };
-    private readonly ExpressionTextBox _boxWidth = new() { Text = "300 mm", Width = INPUT_CONTROL_WIDTH };
-    private readonly ExpressionTextBox _boxHeight = new() { Text = "100 mm", Width = INPUT_CONTROL_WIDTH };
-    private readonly ExpressionTextBox _materialThickness = new() { Text = "12 mm", Width = INPUT_CONTROL_WIDTH };
-    private readonly ExpressionTextBox _fingerLength = new() { Text = "20 mm", Width = INPUT_CONTROL_WIDTH };
-    private readonly ExpressionTextBox _endmillDiameter = new() { Text = "1/8 \"", Width = INPUT_CONTROL_WIDTH };
+    private readonly ExpressionNumberBox _boxLength = new() { Text = "400 mm", Width = INPUT_CONTROL_WIDTH, HighlightEvaluationErrors = true };
+    private readonly ExpressionNumberBox _boxWidth = new() { Text = "300 mm", Width = INPUT_CONTROL_WIDTH, HighlightEvaluationErrors = true };
+    private readonly ExpressionNumberBox _boxHeight = new() { Text = "100 mm", Width = INPUT_CONTROL_WIDTH, HighlightEvaluationErrors = true };
+    private readonly ExpressionNumberBox _materialThickness = new() { Text = "12 mm", Width = INPUT_CONTROL_WIDTH, HighlightEvaluationErrors = true };
+    private readonly ExpressionNumberBox _fingerLength = new() { Text = "20 mm", Width = INPUT_CONTROL_WIDTH, HighlightEvaluationErrors = true };
+    private readonly ExpressionNumberBox _endmillDiameter = new() { Text = "1/8 \"", Width = INPUT_CONTROL_WIDTH, HighlightEvaluationErrors = true };
+    private readonly ComboBox _cornerRelief = new() { Width = INPUT_CONTROL_WIDTH };
 }
