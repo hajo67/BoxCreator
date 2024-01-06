@@ -2,6 +2,7 @@
 // Licensed under MIT license
 
 using System.Globalization;
+using BoxCreator.Geometry;
 
 namespace BoxCreator.BoxCreator;
 
@@ -137,6 +138,29 @@ internal sealed class ApplicationWindow : Form
 
         if (lengthOk && widthOk && heightOk && thicknessOk)
         {
+            var basicBoxParameters = new BasicBoxParameters(boxLength,
+                boxWidth,
+                boxHeight,
+                thickness);
+
+            if (_boxType.SelectedIndex == 0)
+            {
+                var fingerLengthOk = GetFloatValueFromTextBox(_fingerLength, out var fingerLength);
+                var endMillDiameterOk = GetFloatValueFromTextBox(_endmillDiameter, out var endmillDiameter);
+
+                if (fingerLengthOk && endMillDiameterOk)
+                {
+                    var cornerReliefType = ToCornerRelief(_cornerRelief.SelectedIndex);
+                    var fingerJointParameters = new FingerJointParameters(fingerLength,
+                        endmillDiameter,
+                        cornerReliefType);
+                    var fingerJointBoxCreator = new FingerJointBoxCreator()
+                    {
+                        BasicBoxParameters = basicBoxParameters,
+                        FingerJointParameters = fingerJointParameters
+                    };
+                }
+            }
         }
     }
 
@@ -187,6 +211,15 @@ internal sealed class ApplicationWindow : Form
             MessageBoxButtons.OK,
             MessageBoxIcon.Stop);
     }
+
+    private static CornerReliefs ToCornerRelief(int comboBoxSelectedIndex) => comboBoxSelectedIndex switch
+    {
+        0 => CornerReliefs.None,
+        1 => CornerReliefs.StandardDogBone,
+        2 => CornerReliefs.MinimalDogBone,
+        3 => CornerReliefs.Hidden,
+        _ => throw new ArgumentOutOfRangeException(nameof(comboBoxSelectedIndex), $"Not expected value: {comboBoxSelectedIndex}")
+    };
 
     private const int INPUT_CONTROL_WIDTH = 140;
     private Units _activeUnit = Units.Millimeter;
