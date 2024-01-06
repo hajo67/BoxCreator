@@ -154,11 +154,18 @@ internal sealed class ApplicationWindow : Form
                     var fingerJointParameters = new FingerJointParameters(fingerLength,
                         endmillDiameter,
                         cornerReliefType);
-                    var fingerJointBoxCreator = new FingerJointBoxCreator()
+                    var saveDxfFilePath = GetSaveDxfFilePath();
+
+                    if (saveDxfFilePath != string.Empty)
                     {
-                        BasicBoxParameters = basicBoxParameters,
-                        FingerJointParameters = fingerJointParameters
-                    };
+                        var fingerJointBoxCreator = new FingerJointBoxCreator()
+                        {
+                            BasicBoxParameters = basicBoxParameters,
+                            FingerJointParameters = fingerJointParameters
+                        };
+
+                        fingerJointBoxCreator.CreateBox(saveDxfFilePath);
+                    }
                 }
             }
         }
@@ -220,6 +227,18 @@ internal sealed class ApplicationWindow : Form
         3 => CornerReliefs.Hidden,
         _ => throw new ArgumentOutOfRangeException(nameof(comboBoxSelectedIndex), $"Not expected value: {comboBoxSelectedIndex}")
     };
+
+    private static string GetSaveDxfFilePath()
+    {
+        var saveFileDialog = new SaveFileDialog()
+        {
+            Title = "Save DXF File",
+            Filter = "DXF File|*.dxf"
+        };
+        saveFileDialog.ShowDialog();
+
+        return saveFileDialog.FileName;
+    }
 
     private const int INPUT_CONTROL_WIDTH = 140;
     private Units _activeUnit = Units.Millimeter;
