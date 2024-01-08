@@ -15,14 +15,14 @@ internal sealed class ApplicationWindow : Form
 
     private void InitializeComponent()
     {
-        this.Size = new Size(580, 550);
+        this.Size = new Size(580, 580);
         this.Text = "Box Creator";
         this.Padding = new Padding(10);
 
         var groupBox = new GroupBox()
         {
             Text = "Basic Box Settings",
-            MinimumSize = new Size(340, 240),
+            MinimumSize = new Size(340, 265),
             Padding = new Padding(10)
         };
         var tableLayout = new TableLayoutPanel()
@@ -56,6 +56,7 @@ internal sealed class ApplicationWindow : Form
         tableLayout.Controls.Add(_boxHeight, 1, 4);
         tableLayout.Controls.Add(CreateLabel("Material Thickness"), 0, 5);
         tableLayout.Controls.Add(_materialThickness, 1, 5);
+        tableLayout.Controls.Add(_lidCheckBox, 1, 6);
 
         this.Controls.Add(_mainLayout);
         _mainLayout.Controls.Add(groupBox, 0, 0);
@@ -143,7 +144,8 @@ internal sealed class ApplicationWindow : Form
             var basicBoxParameters = new BasicBoxParameters(boxLength,
                 boxWidth,
                 boxHeight,
-                thickness);
+                thickness,
+                _lidCheckBox.Checked);
 
             if (_boxType.SelectedIndex == 0)
             {
@@ -253,8 +255,9 @@ internal sealed class ApplicationWindow : Form
     private readonly ExpressionNumberBox _boxWidth = new() { Text = "300 mm", Width = INPUT_CONTROL_WIDTH, HighlightEvaluationErrors = true };
     private readonly ExpressionNumberBox _boxHeight = new() { Text = "100 mm", Width = INPUT_CONTROL_WIDTH, HighlightEvaluationErrors = true };
     private readonly ExpressionNumberBox _materialThickness = new() { Text = "12 mm", Width = INPUT_CONTROL_WIDTH, HighlightEvaluationErrors = true };
+    private readonly CheckBox _lidCheckBox = new() { Text = "Without Lid", Checked = true, Width = INPUT_CONTROL_WIDTH };
     private readonly ExpressionNumberBox _jointSize = new() { Text = "20 mm", Width = INPUT_CONTROL_WIDTH, HighlightEvaluationErrors = true };
     private readonly ExpressionNumberBox _jointAllowance = new() { Text = "0.1 mm", Width = INPUT_CONTROL_WIDTH, HighlightEvaluationErrors = true };
-    private readonly ExpressionNumberBox _endmillDiameter = new() { Text = "1/8 \"", Width = INPUT_CONTROL_WIDTH, HighlightEvaluationErrors = true };
     private readonly ComboBox _cornerRelief = new() { Width = INPUT_CONTROL_WIDTH };
+    private readonly ExpressionNumberBox _endmillDiameter = new() { Text = "1/8 \"", Width = INPUT_CONTROL_WIDTH, HighlightEvaluationErrors = true };
 }

@@ -7,4 +7,5 @@ public record BasicBoxParameters(
     float BoxLength,
     float BoxWidth,
     float BoxHeight,
-    float MaterialThickness);
+    float MaterialThickness,
+    bool WithoutLid);
