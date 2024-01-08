@@ -15,7 +15,7 @@ internal sealed class ApplicationWindow : Form
 
     private void InitializeComponent()
     {
-        this.Size = new Size(580, 520);
+        this.Size = new Size(580, 550);
         this.Text = "Box Creator";
         this.Padding = new Padding(10);
 
@@ -42,7 +42,7 @@ internal sealed class ApplicationWindow : Form
         _units.Items.Add("Inch");
         _units.SelectedIndex = 0;
         _boxType.SelectedIndexChanged += SelectedBoxTypeChanged;
-        _boxType.Items.Add("Finger Joints");
+        _boxType.Items.Add("Box Joints");
         _boxType.SelectedIndex = 0;
         tableLayout.Controls.Add(CreateLabel("Units"), 0, 0);
         tableLayout.Controls.Add(_units, 1, 0);
@@ -82,7 +82,7 @@ internal sealed class ApplicationWindow : Form
                     _boxWidth,
                     _boxHeight,
                     _materialThickness,
-                    _fingerLength,
+                    _jointSize,
                     _endmillDiameter
                 ];
 
@@ -104,8 +104,8 @@ internal sealed class ApplicationWindow : Form
 
         var groupBox = new GroupBox()
         {
-            Text = "Finger Joint Settings",
-            MinimumSize = new Size(340, 140),
+            Text = "Box Joint Settings",
+            MinimumSize = new Size(340, 170),
             Padding = new Padding(10)
         };
         var tableLayout = new TableLayoutPanel()
@@ -118,12 +118,14 @@ internal sealed class ApplicationWindow : Form
         _cornerRelief.Items.Add("Minimal Dog Bone");
         _cornerRelief.Items.Add("Hidden");
         _cornerRelief.SelectedIndex = 0;
-        tableLayout.Controls.Add(CreateLabel("Min. Finger Length"), 0, 0);
-        tableLayout.Controls.Add(_fingerLength, 1, 0);
-        tableLayout.Controls.Add(CreateLabel("End Mill Diameter"), 0, 1);
-        tableLayout.Controls.Add(_endmillDiameter, 1, 1);
+        tableLayout.Controls.Add(CreateLabel("Min. Joint Size"), 0, 0);
+        tableLayout.Controls.Add(_jointSize, 1, 0);
+        tableLayout.Controls.Add(CreateLabel("Joint Allowance"), 0, 1);
+        tableLayout.Controls.Add(_jointAllowance, 1, 1);
         tableLayout.Controls.Add(CreateLabel("Corner Relief"), 0, 2);
         tableLayout.Controls.Add(_cornerRelief, 1, 2);
+        tableLayout.Controls.Add(CreateLabel("End Mill Diameter"), 0, 3);
+        tableLayout.Controls.Add(_endmillDiameter, 1, 3);
 
         groupBox.Controls.Add(tableLayout);
         _mainLayout.Controls.Add(groupBox, 0, 1);
@@ -145,26 +147,28 @@ internal sealed class ApplicationWindow : Form
 
             if (_boxType.SelectedIndex == 0)
             {
-                var fingerLengthOk = GetFloatValueFromTextBox(_fingerLength, out var fingerLength);
+                var jointSizeOk = GetFloatValueFromTextBox(_jointSize, out var jointSize);
+                var jointAllowanceOk = GetFloatValueFromTextBox(_jointAllowance, out var jointAllowance);
                 var endMillDiameterOk = GetFloatValueFromTextBox(_endmillDiameter, out var endmillDiameter);
 
-                if (fingerLengthOk && endMillDiameterOk)
+                if (jointSizeOk && jointAllowanceOk && endMillDiameterOk)
                 {
                     var cornerReliefType = ToCornerRelief(_cornerRelief.SelectedIndex);
-                    var fingerJointParameters = new FingerJointParameters(fingerLength,
+                    var boxJointParameters = new BoxJointParameters(jointSize,
+                        jointAllowance,
                         endmillDiameter,
                         cornerReliefType);
                     var saveDxfFilePath = GetSaveDxfFilePath();
 
                     if (saveDxfFilePath != string.Empty)
                     {
-                        var fingerJointBoxCreator = new FingerJointBoxCreator()
+                        var boxJointBoxCreator = new BoxJointBoxCreator()
                         {
                             BasicBoxParameters = basicBoxParameters,
-                            FingerJointParameters = fingerJointParameters
+                            BoxJointParameters = boxJointParameters
                         };
 
-                        fingerJointBoxCreator.CreateBox(saveDxfFilePath);
+                        boxJointBoxCreator.CreateBox(saveDxfFilePath);
                     }
                 }
             }
@@ -249,7 +253,8 @@ internal sealed class ApplicationWindow : Form
     private readonly ExpressionNumberBox _boxWidth = new() { Text = "300 mm", Width = INPUT_CONTROL_WIDTH, HighlightEvaluationErrors = true };
     private readonly ExpressionNumberBox _boxHeight = new() { Text = "100 mm", Width = INPUT_CONTROL_WIDTH, HighlightEvaluationErrors = true };
     private readonly ExpressionNumberBox _materialThickness = new() { Text = "12 mm", Width = INPUT_CONTROL_WIDTH, HighlightEvaluationErrors = true };
-    private readonly ExpressionNumberBox _fingerLength = new() { Text = "20 mm", Width = INPUT_CONTROL_WIDTH, HighlightEvaluationErrors = true };
+    private readonly ExpressionNumberBox _jointSize = new() { Text = "20 mm", Width = INPUT_CONTROL_WIDTH, HighlightEvaluationErrors = true };
+    private readonly ExpressionNumberBox _jointAllowance = new() { Text = "0.1 mm", Width = INPUT_CONTROL_WIDTH, HighlightEvaluationErrors = true };
     private readonly ExpressionNumberBox _endmillDiameter = new() { Text = "1/8 \"", Width = INPUT_CONTROL_WIDTH, HighlightEvaluationErrors = true };
     private readonly ComboBox _cornerRelief = new() { Width = INPUT_CONTROL_WIDTH };
 }

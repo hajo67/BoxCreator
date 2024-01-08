@@ -3,7 +3,8 @@
 
 namespace BoxCreator.Geometry;
 
-public record FingerJointParameters(
-    float MinFingerLength,
+public record BoxJointParameters(
+    float MinJointSize,
+    float JointAllowance,
     float EndmillDiameter,
     CornerReliefs CornerReliefType);

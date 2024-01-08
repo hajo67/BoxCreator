@@ -7,10 +7,10 @@ using netDxf;
 
 namespace BoxCreator.Geometry;
 
-public sealed class FingerJointBoxCreator
+public sealed class BoxJointBoxCreator
 {
     public required BasicBoxParameters BasicBoxParameters { get; init; }
-    public required FingerJointParameters FingerJointParameters { get; init; }
+    public required BoxJointParameters BoxJointParameters { get; init; }
 
     public void CreateBox(string saveDxfFilePath)
     {
@@ -27,7 +27,7 @@ public sealed class FingerJointBoxCreator
         document.AddPolyline(polyline);
         document.SaveDxf(dxfFileStream);
 
-        if (FingerJointParameters.CornerReliefType == CornerReliefs.None)
+        if (BoxJointParameters.CornerReliefType == CornerReliefs.None)
         {
         }
     }
