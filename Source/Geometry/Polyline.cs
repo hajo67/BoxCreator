@@ -38,5 +38,10 @@ public sealed class Polyline
         }
     }
 
+    public void DeleteLastEntity()
+    {
+        _polyline.Vertexes.RemoveAt(_polyline.Vertexes.Count - 1);
+    }
+
     private readonly Polyline2D _polyline = new();
 }
