@@ -22,14 +22,15 @@ public sealed class BoxJointBoxCreator
             FileMode.OpenOrCreate,
             FileAccess.Write);
 
-        CreateBottomSide(document);
+        CreateBottom(document);
+        CreateFront(document);
         document.SaveDxf(dxfFileStream);
     }
 
-    private void CreateBottomSide(Document document)
+    private void CreateBottom(Document document)
     {
-        var jointLayoutX = CalculateJointSize(BasicBoxParameters.BoxWidth, BoxJointParameters.MinJointSize);
-        var jointLayoutY = CalculateJointSize(BasicBoxParameters.BoxLength, BoxJointParameters.MinJointSize);
+        var jointLayoutX = CalculateJointSize(BasicBoxParameters.BoxWidth, BoxJointParameters.MinJointSize, false);
+        var jointLayoutY = CalculateJointSize(BasicBoxParameters.BoxLength, BoxJointParameters.MinJointSize, false);
         var startX = BasicBoxParameters.BoxHeight + SidesDistance;
         var startY = BasicBoxParameters.BoxHeight + SidesDistance;
         var currentPosition = new Vector2(startX, startY);
@@ -38,13 +39,38 @@ public sealed class BoxJointBoxCreator
         currentPosition = CreateLines(polyline, currentPosition, jointLayoutX, new Vector2(1, 0), new Vector2(0, 1));
         currentPosition = CreateLines(polyline, currentPosition, jointLayoutY, new Vector2(0, 1), new Vector2(-1, 0));
         currentPosition = CreateLines(polyline, currentPosition, jointLayoutX, new Vector2(-1, 0), new Vector2(0, -1));
-        currentPosition = CreateLines(polyline, currentPosition, jointLayoutY, new Vector2(0, -1), new Vector2(1, 0));
+        CreateLines(polyline, currentPosition, jointLayoutY, new Vector2(0, -1), new Vector2(1, 0));
         polyline.DeleteLastEntity();
         document.AddPolyline(polyline);
     }
 
-    private static JointLayout CalculateJointSize(double sideLength, double minJointSize)
+    private void CreateFront(Document document)
     {
+        var jointLayoutX = CalculateJointSize(BasicBoxParameters.BoxWidth, BoxJointParameters.MinJointSize, false);
+        var jointLayoutZ = CalculateJointSize(BasicBoxParameters.BoxHeight, BoxJointParameters.MinJointSize, true);
+        var startX = BasicBoxParameters.BoxHeight + SidesDistance;
+        var startY = BasicBoxParameters.MaterialThickness;
+        var currentPosition = new Vector2(startX, startY);
+        var polyline = new Polyline(currentPosition);
+
+        currentPosition = CreateLines(polyline, currentPosition, jointLayoutX, new Vector2(1, 0), new Vector2(0, -1));
+        currentPosition = CreateLines(polyline, currentPosition, jointLayoutZ, new Vector2(0, 1), new Vector2(-1, 0));
+        currentPosition = CreateLines(polyline, currentPosition, jointLayoutX, new Vector2(-1, 0), new Vector2(0, 1));
+        CreateLines(polyline, currentPosition, jointLayoutZ, new Vector2(0, -1), new Vector2(1, 0));
+        polyline.DeleteLastEntity();
+        document.AddPolyline(polyline);
+    }
+
+    private JointLayout CalculateJointSize(
+        double sideLength,
+        double minJointSize,
+        bool startPointIsLocatedInside)
+    {
+        if (startPointIsLocatedInside)
+        {
+            sideLength -= 2 * BasicBoxParameters.MaterialThickness;
+        }
+
         var jointCount = (int)Math.Floor(sideLength / minJointSize);
 
         if (0 == jointCount % 2)
