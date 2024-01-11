@@ -56,7 +56,7 @@ internal sealed class ApplicationWindow : Form
         tableLayout.Controls.Add(_boxHeight, 1, 4);
         tableLayout.Controls.Add(CreateLabel("Material Thickness"), 0, 5);
         tableLayout.Controls.Add(_materialThickness, 1, 5);
-        tableLayout.Controls.Add(_lidCheckBox, 1, 6);
+        tableLayout.Controls.Add(_topSideCheckBox, 1, 6);
 
         this.Controls.Add(_mainLayout);
         _mainLayout.Controls.Add(groupBox, 0, 0);
@@ -145,7 +145,7 @@ internal sealed class ApplicationWindow : Form
                 boxWidth,
                 boxHeight,
                 thickness,
-                _lidCheckBox.Checked);
+                _topSideCheckBox.Checked);
 
             if (_boxType.SelectedIndex == 0)
             {
@@ -255,7 +255,7 @@ internal sealed class ApplicationWindow : Form
     private readonly ExpressionNumberBox _boxWidth = new() { Text = "300 mm", Width = INPUT_CONTROL_WIDTH, HighlightEvaluationErrors = true };
     private readonly ExpressionNumberBox _boxHeight = new() { Text = "100 mm", Width = INPUT_CONTROL_WIDTH, HighlightEvaluationErrors = true };
     private readonly ExpressionNumberBox _materialThickness = new() { Text = "12 mm", Width = INPUT_CONTROL_WIDTH, HighlightEvaluationErrors = true };
-    private readonly CheckBox _lidCheckBox = new() { Text = "Without Lid", Checked = true, Width = INPUT_CONTROL_WIDTH };
+    private readonly CheckBox _topSideCheckBox = new() { Text = "Without Top Side", Checked = true, Width = INPUT_CONTROL_WIDTH };
     private readonly ExpressionNumberBox _jointSize = new() { Text = "20 mm", Width = INPUT_CONTROL_WIDTH, HighlightEvaluationErrors = true };
     private readonly ExpressionNumberBox _jointAllowance = new() { Text = "0.1 mm", Width = INPUT_CONTROL_WIDTH, HighlightEvaluationErrors = true };
     private readonly ComboBox _cornerRelief = new() { Width = INPUT_CONTROL_WIDTH };

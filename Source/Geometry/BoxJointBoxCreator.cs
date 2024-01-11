@@ -24,113 +24,149 @@ public sealed class BoxJointBoxCreator
 
         CreateBottom(document);
         CreateFront(document);
+        CreateBack(document);
+        CreateLeft(document);
+        CreateRight(document);
+        CreateTop(document);
         document.SaveDxf(dxfFileStream);
     }
 
     private void CreateBottom(Document document)
     {
-        var jointLayoutX = CalculateJointSize(BasicBoxParameters.BoxWidth, BoxJointParameters.MinJointSize, false);
-        var jointLayoutY = CalculateJointSize(BasicBoxParameters.BoxLength, BoxJointParameters.MinJointSize, false);
         var startX = BasicBoxParameters.BoxHeight + SidesDistance;
         var startY = BasicBoxParameters.BoxHeight + SidesDistance;
-        var currentPosition = new Vector2(startX, startY);
-        var polyline = new Polyline(currentPosition);
-
-        currentPosition = CreateLines(polyline, currentPosition, jointLayoutX, new Vector2(1, 0), new Vector2(0, 1));
-        currentPosition = CreateLines(polyline, currentPosition, jointLayoutY, new Vector2(0, 1), new Vector2(-1, 0));
-        currentPosition = CreateLines(polyline, currentPosition, jointLayoutX, new Vector2(-1, 0), new Vector2(0, -1));
-        CreateLines(polyline, currentPosition, jointLayoutY, new Vector2(0, -1), new Vector2(1, 0));
-        polyline.DeleteLastEntity();
+        var faceCreator = new BoxJointFaceCreator()
+        {
+            JointFaceSides = FaceSides.All,
+            Origin = new Vector2(startX, startY),
+            Length = BasicBoxParameters.BoxLength,
+            Height = BasicBoxParameters.BoxWidth,
+            Thickness = BasicBoxParameters.MaterialThickness,
+            BoxJointParameters = BoxJointParameters,
+            StartWithThicknessOffsetInLengthDirection = false,
+            StartWithThicknessOffsetInHeightDirection = false
+        };
+        var polyline = faceCreator.CreateFace();
         document.AddPolyline(polyline);
     }
 
     private void CreateFront(Document document)
     {
-        var jointLayoutX = CalculateJointSize(BasicBoxParameters.BoxWidth, BoxJointParameters.MinJointSize, false);
-        var jointLayoutZ = CalculateJointSize(BasicBoxParameters.BoxHeight, BoxJointParameters.MinJointSize, true);
         var startX = BasicBoxParameters.BoxHeight + SidesDistance;
-        var startY = BasicBoxParameters.MaterialThickness;
-        var currentPosition = new Vector2(startX, startY);
-        var polyline = new Polyline(currentPosition);
+        var startY = 0.0;
+        var faceSides = BasicBoxParameters.WithoutTopSide ?
+            GetJointSidesMinusSide(FaceSides.Bottom) :
+            FaceSides.All;
 
-        currentPosition = CreateLines(polyline, currentPosition, jointLayoutX, new Vector2(1, 0), new Vector2(0, -1));
-        currentPosition = CreateLines(polyline, currentPosition, jointLayoutZ, new Vector2(0, 1), new Vector2(-1, 0));
-        currentPosition = CreateLines(polyline, currentPosition, jointLayoutX, new Vector2(-1, 0), new Vector2(0, 1));
-        CreateLines(polyline, currentPosition, jointLayoutZ, new Vector2(0, -1), new Vector2(1, 0));
-        polyline.DeleteLastEntity();
+        var faceCreator = new BoxJointFaceCreator()
+        {
+            JointFaceSides = faceSides,
+            Origin = new Vector2(startX, startY),
+            Length = BasicBoxParameters.BoxLength,
+            Height = BasicBoxParameters.BoxHeight,
+            Thickness = BasicBoxParameters.MaterialThickness,
+            BoxJointParameters = BoxJointParameters,
+            StartWithThicknessOffsetInLengthDirection = false,
+            StartWithThicknessOffsetInHeightDirection = true
+        };
+        var polyline = faceCreator.CreateFace();
         document.AddPolyline(polyline);
     }
 
-    private JointLayout CalculateJointSize(
-        double sideLength,
-        double minJointSize,
-        bool startPointIsLocatedInside)
+    private void CreateBack(Document document)
     {
-        if (startPointIsLocatedInside)
-        {
-            sideLength -= 2 * BasicBoxParameters.MaterialThickness;
-        }
+        var startX = BasicBoxParameters.BoxHeight + SidesDistance;
+        var startY = BasicBoxParameters.BoxHeight + 2 * SidesDistance + BasicBoxParameters.BoxWidth;
+        var faceSides = BasicBoxParameters.WithoutTopSide ?
+            GetJointSidesMinusSide(FaceSides.Top) :
+            FaceSides.All;
 
-        var jointCount = (int)Math.Floor(sideLength / minJointSize);
-
-        if (0 == jointCount % 2)
+        var faceCreator = new BoxJointFaceCreator()
         {
-            jointCount--;
-        }
-        if (jointCount < 3)
-        {
-            jointCount = 3;
-        }
-
-        return (jointCount, sideLength / jointCount);
+            JointFaceSides = faceSides,
+            Origin = new Vector2(startX, startY),
+            Length = BasicBoxParameters.BoxLength,
+            Height = BasicBoxParameters.BoxHeight,
+            Thickness = BasicBoxParameters.MaterialThickness,
+            BoxJointParameters = BoxJointParameters,
+            StartWithThicknessOffsetInLengthDirection = false,
+            StartWithThicknessOffsetInHeightDirection = true
+        };
+        var polyline = faceCreator.CreateFace();
+        document.AddPolyline(polyline);
     }
 
-    private Vector2 CreateLines(
-        Polyline polyline,
-        Vector2 startPosition,
-        JointLayout jointLayout,
-        Vector2 firstNormVector,
-        Vector2 secondNormVector)
+    private void CreateLeft(Document document)
     {
-        var nextPosition = startPosition;
-        var firstVector = firstNormVector * jointLayout.JointSize;
-        var secondVector = secondNormVector * BasicBoxParameters.MaterialThickness;
+        var startX = 0.0;
+        var startY = BasicBoxParameters.BoxHeight + SidesDistance;
+        var faceSides = BasicBoxParameters.WithoutTopSide ?
+            GetJointSidesMinusSide(FaceSides.Right) :
+            FaceSides.All;
 
-        for (var jointIndex = 1; jointIndex <= jointLayout.JointCount; jointIndex++)
+        var faceCreator = new BoxJointFaceCreator()
         {
-            if (BoxJointParameters.CornerReliefType == CornerReliefs.None)
+            JointFaceSides = faceSides,
+            Origin = new Vector2(startX, startY),
+            Length = BasicBoxParameters.BoxHeight,
+            Height = BasicBoxParameters.BoxWidth,
+            Thickness = BasicBoxParameters.MaterialThickness,
+            BoxJointParameters = BoxJointParameters,
+            StartWithThicknessOffsetInLengthDirection = true,
+            StartWithThicknessOffsetInHeightDirection = false
+        };
+        var polyline = faceCreator.CreateFace();
+        document.AddPolyline(polyline);
+    }
+
+    private void CreateRight(Document document)
+    {
+        var startX = BasicBoxParameters.BoxHeight + 2 * SidesDistance + BasicBoxParameters.BoxLength;
+        var startY = BasicBoxParameters.BoxHeight + SidesDistance;
+        var faceSides = BasicBoxParameters.WithoutTopSide ?
+            GetJointSidesMinusSide(FaceSides.Left) :
+            FaceSides.All;
+
+        var faceCreator = new BoxJointFaceCreator()
+        {
+            JointFaceSides = faceSides,
+            Origin = new Vector2(startX, startY),
+            Length = BasicBoxParameters.BoxHeight,
+            Height = BasicBoxParameters.BoxWidth,
+            Thickness = BasicBoxParameters.MaterialThickness,
+            BoxJointParameters = BoxJointParameters,
+            StartWithThicknessOffsetInLengthDirection = true,
+            StartWithThicknessOffsetInHeightDirection = false
+        };
+        var polyline = faceCreator.CreateFace();
+        document.AddPolyline(polyline);
+    }
+
+    private void CreateTop(Document document)
+    {
+        if (!BasicBoxParameters.WithoutTopSide)
+        {
+            var startX = BasicBoxParameters.BoxHeight + SidesDistance;
+            var startY = 2 * BasicBoxParameters.BoxHeight + 3 * SidesDistance + BasicBoxParameters.BoxWidth;
+            var faceCreator = new BoxJointFaceCreator()
             {
-                nextPosition = AddSegmentToPolyline(
-                    polyline,
-                    nextPosition,
-                    firstVector,
-                    secondVector,
-                    jointIndex == jointLayout.JointCount);
-            }
-            secondVector = -secondVector;
+                JointFaceSides = FaceSides.All,
+                Origin = new Vector2(startX, startY),
+                Length = BasicBoxParameters.BoxLength,
+                Height = BasicBoxParameters.BoxWidth,
+                Thickness = BasicBoxParameters.MaterialThickness,
+                BoxJointParameters = BoxJointParameters,
+                StartWithThicknessOffsetInLengthDirection = false,
+                StartWithThicknessOffsetInHeightDirection = false
+            };
+            var polyline = faceCreator.CreateFace();
+            document.AddPolyline(polyline);
         }
-
-        return nextPosition;
     }
 
-    private static Vector2 AddSegmentToPolyline(
-        Polyline polyline,
-        Vector2 startPosition,
-        Vector2 firstVector,
-        Vector2 secondVector,
-        bool ignoreSecondSegment)
+    private static FaceSides GetJointSidesMinusSide(FaceSides minusSide)
     {
-        var nextPosition = startPosition;
-
-        nextPosition += firstVector;
-        polyline.AddLine(nextPosition);
-        if (!ignoreSecondSegment)
-        {
-            nextPosition += secondVector;
-            polyline.AddLine(nextPosition);
-        }
-
-        return nextPosition;
+        return FaceSides.All ^ minusSide;
     }
 
     private const double SidesDistance = 10;

@@ -8,4 +8,4 @@ public record BasicBoxParameters(
     float BoxWidth,
     float BoxHeight,
     float MaterialThickness,
-    bool WithoutLid);
+    bool WithoutTopSide);
