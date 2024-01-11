@@ -101,7 +101,7 @@ public sealed class BoxJointBoxCreator
         var startX = 0.0;
         var startY = BasicBoxParameters.BoxHeight + SidesDistance;
         var faceSides = BasicBoxParameters.WithoutTopSide ?
-            GetJointSidesMinusSide(FaceSides.Right) :
+            GetJointSidesMinusSide(FaceSides.Left) :
             FaceSides.All;
 
         var faceCreator = new BoxJointFaceCreator()
@@ -124,7 +124,7 @@ public sealed class BoxJointBoxCreator
         var startX = BasicBoxParameters.BoxHeight + 2 * SidesDistance + BasicBoxParameters.BoxLength;
         var startY = BasicBoxParameters.BoxHeight + SidesDistance;
         var faceSides = BasicBoxParameters.WithoutTopSide ?
-            GetJointSidesMinusSide(FaceSides.Left) :
+            GetJointSidesMinusSide(FaceSides.Right) :
             FaceSides.All;
 
         var faceCreator = new BoxJointFaceCreator()

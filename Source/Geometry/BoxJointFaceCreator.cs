@@ -31,13 +31,19 @@ internal sealed class BoxJointFaceCreator
             CreateSingleLine(polyline, currentPosition, jointLayoutX, firstVector);
         firstVector = Vector2.UnitY;
         secondVector = StartWithThicknessOffsetInLengthDirection ? Vector2.UnitX : -Vector2.UnitX;
-        currentPosition = CreateLines(polyline, currentPosition, jointLayoutY, firstVector, secondVector);
+        currentPosition = JointFaceSides.HasFlag(FaceSides.Right) ?
+            CreateLines(polyline, currentPosition, jointLayoutY, firstVector, secondVector) :
+            CreateSingleLine(polyline, currentPosition, jointLayoutY, firstVector);
         firstVector = -Vector2.UnitX;
         secondVector = StartWithThicknessOffsetInHeightDirection ? Vector2.UnitY : -Vector2.UnitY;
-        currentPosition = CreateLines(polyline, currentPosition, jointLayoutX, firstVector, secondVector);
+        currentPosition = JointFaceSides.HasFlag(FaceSides.Top) ?
+            CreateLines(polyline, currentPosition, jointLayoutX, firstVector, secondVector) :
+            CreateSingleLine(polyline, currentPosition, jointLayoutX, firstVector);
         firstVector = -Vector2.UnitY;
         secondVector = StartWithThicknessOffsetInLengthDirection ? -Vector2.UnitX : Vector2.UnitX;
-        CreateLines(polyline, currentPosition, jointLayoutY, firstVector, secondVector);
+        _ = JointFaceSides.HasFlag(FaceSides.Left) ?
+            CreateLines(polyline, currentPosition, jointLayoutY, firstVector, secondVector) :
+            CreateSingleLine(polyline, currentPosition, jointLayoutY, firstVector);
         polyline.DeleteLastEntity();
 
         return polyline;
@@ -51,16 +57,37 @@ internal sealed class BoxJointFaceCreator
 
         if (StartWithThicknessOffsetInLengthDirection)
         {
-            length -= 2 * Thickness;
-            origin.X += Thickness;
+            length = ReduceValueByThicknessDependingOnJointFaceSides(Length, FaceSides.Left, FaceSides.Right);
+            origin.X += JointFaceSides.HasFlag(FaceSides.Left) ?
+                Thickness :
+                0;
         }
         if (StartWithThicknessOffsetInHeightDirection)
         {
-            height -= 2 * Thickness;
-            origin.Y += Thickness;
+            height = ReduceValueByThicknessDependingOnJointFaceSides(Height, FaceSides.Bottom, FaceSides.Top);
+            origin.Y += JointFaceSides.HasFlag(FaceSides.Bottom) ?
+                Thickness :
+                0;
         }
 
         return (length, height, origin);
+    }
+
+    private double ReduceValueByThicknessDependingOnJointFaceSides(
+        double value,
+        FaceSides firstSide,
+        FaceSides secondSide)
+    {
+        if (JointFaceSides.HasFlag(firstSide))
+        {
+            value -= Thickness;
+        }
+        if (JointFaceSides.HasFlag(secondSide))
+        {
+            value -= Thickness;
+        }
+
+        return value;
     }
 
     private static JointLayout CalculateJointSize(
