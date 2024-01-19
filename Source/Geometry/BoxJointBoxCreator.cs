@@ -99,7 +99,7 @@ public sealed class BoxJointBoxCreator
     private void CreateLeft(Document document)
     {
         var startX = 0.0;
-        var startY = BasicBoxParameters.BoxHeight + SidesDistance;
+        var startY = BasicBoxParameters.BoxHeight + SidesDistance - BasicBoxParameters.MaterialThickness;
         var faceSides = BasicBoxParameters.WithoutTopSide ?
             GetJointSidesMinusSide(FaceSides.Left) :
             FaceSides.All;
@@ -109,11 +109,11 @@ public sealed class BoxJointBoxCreator
             JointFaceSides = faceSides,
             Origin = new Vector2(startX, startY),
             Length = BasicBoxParameters.BoxHeight,
-            Height = BasicBoxParameters.BoxWidth,
+            Height = BasicBoxParameters.BoxWidth + 2 * BasicBoxParameters.MaterialThickness,
             Thickness = BasicBoxParameters.MaterialThickness,
             BoxJointParameters = BoxJointParameters,
             StartWithThicknessOffsetInLengthDirection = true,
-            StartWithThicknessOffsetInHeightDirection = false
+            StartWithThicknessOffsetInHeightDirection = true
         };
         var polyline = faceCreator.CreateFace();
         document.AddPolyline(polyline);
@@ -122,7 +122,7 @@ public sealed class BoxJointBoxCreator
     private void CreateRight(Document document)
     {
         var startX = BasicBoxParameters.BoxHeight + 2 * SidesDistance + BasicBoxParameters.BoxLength;
-        var startY = BasicBoxParameters.BoxHeight + SidesDistance;
+        var startY = BasicBoxParameters.BoxHeight + SidesDistance - BasicBoxParameters.MaterialThickness;
         var faceSides = BasicBoxParameters.WithoutTopSide ?
             GetJointSidesMinusSide(FaceSides.Right) :
             FaceSides.All;
@@ -132,11 +132,11 @@ public sealed class BoxJointBoxCreator
             JointFaceSides = faceSides,
             Origin = new Vector2(startX, startY),
             Length = BasicBoxParameters.BoxHeight,
-            Height = BasicBoxParameters.BoxWidth,
+            Height = BasicBoxParameters.BoxWidth + 2 * BasicBoxParameters.MaterialThickness,
             Thickness = BasicBoxParameters.MaterialThickness,
             BoxJointParameters = BoxJointParameters,
             StartWithThicknessOffsetInLengthDirection = true,
-            StartWithThicknessOffsetInHeightDirection = false
+            StartWithThicknessOffsetInHeightDirection = true
         };
         var polyline = faceCreator.CreateFace();
         document.AddPolyline(polyline);
